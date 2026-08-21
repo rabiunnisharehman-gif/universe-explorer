@@ -6,403 +6,729 @@
 <title>Ultimate Universe Explorer</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:Arial,sans-serif;
+  background:#01030a;
+  color:white;
 }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  color: white;
+canvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+}
+
+#space{
+  position:fixed;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  cursor:grab;
+}
+
+#space:active{cursor:grabbing}
+
+.header{
+  position:fixed;
+  top:15px;
+  left:50%;
+  transform:translateX(-50%);
+  width:94%;
+  max-width:850px;
+  z-index:10;
+  text-align:center;
+  pointer-events:none;
+}
+
+.title{
+  font-size:clamp(25px,6vw,50px);
+  font-weight:900;
+  letter-spacing:3px;
+  text-shadow:
+    0 0 10px #42bfff,
+    0 0 30px #147bff;
+}
+
+.subtitle{
+  color:#9edcff;
+  font-size:13px;
+  letter-spacing:2px;
+}
+
+.search{
+  margin:15px auto;
+  display:flex;
+  max-width:550px;
+  pointer-events:auto;
+}
+
+.search input{
+  flex:1;
+  padding:14px;
+  border:1px solid #38a9ff;
+  border-radius:14px 0 0 14px;
+  background:rgba(2,8,25,.85);
+  color:white;
+  outline:none;
+  font-size:15px;
+}
+
+.search button{
+  border:0;
+  padding:0 20px;
+  border-radius:0 14px 14px 0;
+  background:#168dff;
+  color:white;
+  font-weight:bold;
+}
+
+.controls{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:10;
+  width:94%;
+  max-width:850px;
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.btn{
+  padding:12px 15px;
+  border:1px solid #299fff;
+  border-radius:14px;
+  background:rgba(4,22,55,.82);
+  color:white;
+  font-weight:bold;
+  box-shadow:0 0 15px rgba(20,140,255,.2);
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+}
+
+.btn:hover{
+  background:#087ce0;
+  box-shadow:0 0 25px #168dff;
+}
+
+.object{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  cursor:pointer;
+  z-index:3;
+  transition:transform .2s,filter .2s;
+}
+
+.object:hover{
+  filter:brightness(1.5);
+  transform:translate(-50%,-50%) scale(1.15);
+}
+
+.sun{
+  width:100px;
+  height:100px;
+  background:radial-gradient(circle,#fffbd0 0,#ffe66d 25%,#ff9d00 55%,#ff4300 100%);
+  box-shadow:
+    0 0 25px #ffd000,
+    0 0 70px #ff8c00,
+    0 0 130px rgba(255,90,0,.6);
+}
+
+.planet{
+  box-shadow:0 0 12px rgba(100,200,255,.5);
+}
+
+.mercury{
+  width:15px;height:15px;
+  background:#9d9d9d;
+}
+
+.venus{
+  width:22px;height:22px;
+  background:linear-gradient(135deg,#ffe0a0,#c87522);
+}
+
+.earth{
+  width:27px;height:27px;
   background:
-    radial-gradient(circle at 20% 20%, #263b70 0, transparent 18%),
-    radial-gradient(circle at 80% 30%, #421d68 0, transparent 20%),
-    radial-gradient(circle at 50% 80%, #102b50 0, transparent 25%),
-    #02030b;
-  min-height: 100vh;
-  overflow-x: hidden;
+    radial-gradient(circle at 30% 30%,#6de6ff 0 20%,transparent 21%),
+    radial-gradient(circle at 60% 55%,#32b95c 0 18%,transparent 19%),
+    #167be5;
 }
 
-/* Stars */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(white 1px, transparent 1px),
-    radial-gradient(#8fdcff 1px, transparent 1px);
-  background-size: 90px 90px, 150px 150px;
-  background-position: 20px 30px, 70px 100px;
-  opacity: .55;
-  z-index: -1;
+.mars{
+  width:22px;height:22px;
+  background:linear-gradient(135deg,#ff875d,#9d291b);
 }
 
-header {
-  text-align: center;
-  padding: 28px 15px 15px;
+.jupiter{
+  width:55px;height:55px;
+  background:repeating-linear-gradient(
+    0deg,
+    #c99162 0 7px,
+    #f0c28c 7px 14px,
+    #a86645 14px 20px
+  );
 }
 
-h1 {
-  margin: 0;
-  font-size: 34px;
-  letter-spacing: 2px;
-  text-shadow: 0 0 20px #58bfff;
+.saturn{
+  width:48px;height:48px;
+  background:linear-gradient(135deg,#ead39a,#aa8249);
 }
 
-.subtitle {
-  color: #b8dfff;
-  margin-top: 10px;
+.saturn:after{
+  content:"";
+  position:absolute;
+  width:80px;
+  height:22px;
+  left:-16px;
+  top:13px;
+  border:4px solid #d7bd7b;
+  border-radius:50%;
+  transform:rotate(-18deg);
 }
 
-.search {
-  width: min(90%, 500px);
-  margin: 20px auto;
-  display: flex;
+.uranus{
+  width:36px;height:36px;
+  background:#73dbe8;
 }
 
-.search input {
-  flex: 1;
-  padding: 14px;
-  border: 1px solid #4da9ff;
-  border-radius: 12px 0 0 12px;
-  background: rgba(0,0,20,.75);
-  color: white;
-  outline: none;
+.neptune{
+  width:35px;height:35px;
+  background:radial-gradient(circle at 35% 30%,#83a9ff,#174bd1);
 }
 
-.search button {
-  border: none;
-  padding: 0 18px;
-  border-radius: 0 12px 12px 0;
-  background: #168cff;
-  color: white;
-  font-weight: bold;
-}
-
-.space {
-  position: relative;
-  width: 95%;
-  max-width: 1100px;
-  height: 520px;
-  margin: 10px auto;
-  border: 1px solid #285b9c;
-  border-radius: 25px;
-  overflow: hidden;
+/* Black hole */
+.blackhole{
+  width:95px;
+  height:95px;
   background:
-    radial-gradient(circle at center, rgba(255,190,50,.12), transparent 15%),
-    rgba(0,0,15,.55);
-  box-shadow: 0 0 35px rgba(40,150,255,.2);
+    radial-gradient(circle,#000 0 27%,transparent 28%),
+    conic-gradient(
+      #ff6b00,
+      #ffda55,
+      #ff4b00,
+      #7b2cff,
+      #ff6b00
+    );
+  box-shadow:
+    0 0 25px #ff7400,
+    0 0 70px #8b35ff;
+  animation:spin 3s linear infinite;
 }
 
-/* Sun */
-.sun {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 75px;
-  height: 75px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff7a0, #ffb300, #ff5e00);
-  box-shadow: 0 0 25px #ffae00, 0 0 70px #ff6500;
-  cursor: pointer;
-  z-index: 5;
+@keyframes spin{
+  to{transform:translate(-50%,-50%) rotate(360deg)}
 }
 
-/* Orbit rings */
-.orbit {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border: 1px solid rgba(100,180,255,.22);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+/* Comet */
+.comet{
+  width:18px;
+  height:18px;
+  background:#eaffff;
+  box-shadow:
+    0 0 15px #fff,
+    -70px 0 25px rgba(90,220,255,.2);
 }
 
-.o1 { width: 130px; height: 130px; }
-.o2 { width: 190px; height: 190px; }
-.o3 { width: 260px; height: 260px; }
-.o4 { width: 330px; height: 330px; }
-.o5 { width: 400px; height: 400px; }
-.o6 { width: 470px; height: 470px; }
-.o7 { width: 540px; height: 540px; }
-.o8 { width: 610px; height: 610px; }
-
-/* Planets */
-.planet {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: .3s;
+/* Asteroid belt */
+.asteroid{
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#b6a68e;
+  z-index:2;
 }
 
-.planet:hover {
-  transform: scale(1.25);
-  filter: brightness(1.4);
+.panel{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(.9);
+  width:min(90%,500px);
+  max-height:75vh;
+  overflow:auto;
+  padding:25px;
+  border:1px solid #39aaff;
+  border-radius:25px;
+  background:rgba(2,8,25,.92);
+  backdrop-filter:blur(18px);
+  box-shadow:
+    0 0 30px rgba(20,150,255,.35),
+    inset 0 0 30px rgba(30,120,255,.08);
+  z-index:30;
+  display:none;
+  text-align:center;
 }
 
-.mercury {
-  width: 12px;
-  height: 12px;
-  background: #aaa;
-  transform: translate(-50%, -50%) translateX(65px);
+.panel.show{
+  display:block;
+  animation:open .25s ease;
 }
 
-.venus {
-  width: 18px;
-  height: 18px;
-  background: #d99445;
-  transform: translate(-50%, -50%) translateX(95px);
-}
-
-.earth {
-  width: 21px;
-  height: 21px;
-  background: radial-gradient(circle at 35% 35%, #65d7ff 0 35%, #168cff 36% 65%, #28b85c 66%);
-  transform: translate(-50%, -50%) translateX(130px);
-}
-
-.mars {
-  width: 17px;
-  height: 17px;
-  background: #d34b35;
-  transform: translate(-50%, -50%) translateX(165px);
-}
-
-.jupiter {
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(#d8a06d 0 18%, #9d6948 19% 35%, #e0bd91 36% 50%, #8f5b42 51% 70%, #d4a16d 71%);
-  transform: translate(-50%, -50%) translateX(200px);
-}
-
-.saturn {
-  width: 36px;
-  height: 36px;
-  background: #d6b878;
-  transform: translate(-50%, -50%) translateX(235px);
-}
-
-.saturn::after {
-  content: "";
-  position: absolute;
-  width: 60px;
-  height: 15px;
-  left: -12px;
-  top: 10px;
-  border: 3px solid #c9ad73;
-  border-radius: 50%;
-  transform: rotate(-15deg);
-}
-
-.uranus {
-  width: 27px;
-  height: 27px;
-  background: #76d8e5;
-  transform: translate(-50%, -50%) translateX(270px);
-}
-
-.neptune {
-  width: 27px;
-  height: 27px;
-  background: #326de6;
-  transform: translate(-50%, -50%) translateX(305px);
-}
-
-.label {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  font-size: 11px;
-  color: #cceaff;
-  pointer-events: none;
-}
-
-.info {
-  width: min(92%, 650px);
-  margin: 20px auto 40px;
-  padding: 25px;
-  border: 1px solid #378ee0;
-  border-radius: 20px;
-  background: rgba(5,12,35,.85);
-  box-shadow: 0 0 30px rgba(30,130,255,.15);
-  text-align: center;
-}
-
-.info h2 {
-  margin-top: 0;
-  color: #72c9ff;
-}
-
-.buttons {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 15px auto;
-}
-
-.buttons button {
-  padding: 12px 16px;
-  border: 1px solid #348fe8;
-  border-radius: 12px;
-  background: rgba(15,50,100,.6);
-  color: white;
-  cursor: pointer;
-}
-
-.buttons button:hover {
-  background: #167bd8;
-}
-
-@media(max-width:600px) {
-  h1 {
-    font-size: 25px;
+@keyframes open{
+  from{
+    opacity:0;
+    transform:translate(-50%,-50%) scale(.8);
   }
-
-  .space {
-    height: 430px;
+  to{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1);
   }
+}
 
-  .o8 {
-    width: 390px;
-    height: 390px;
-  }
+.panel h2{
+  color:#6bd0ff;
+  font-size:28px;
+  margin-top:0;
+}
 
-  .neptune {
-    transform: translate(-50%, -50%) translateX(195px);
-  }
+.panel p{
+  line-height:1.6;
+  color:#d7edff;
+}
 
-  .uranus {
-    transform: translate(-50%, -50%) translateX(175px);
-  }
+.close{
+  position:absolute;
+  right:15px;
+  top:12px;
+  border:0;
+  background:transparent;
+  color:white;
+  font-size:25px;
+  cursor:pointer;
+}
 
-  .saturn {
-    transform: translate(-50%, -50%) translateX(155px);
-  }
+.status{
+  position:fixed;
+  left:15px;
+  bottom:20px;
+  z-index:10;
+  color:#7ed5ff;
+  font-size:12px;
+  background:rgba(0,10,25,.7);
+  padding:8px 12px;
+  border-radius:10px;
+}
 
-  .jupiter {
-    transform: translate(-50%, -50%) translateX(135px);
-  }
-
-  .mars {
-    transform: translate(-50%, -50%) translateX(115px);
-  }
-
-  .earth {
-    transform: translate(-50%, -50%) translateX(90px);
-  }
-
-  .venus {
-    transform: translate(-50%, -50%) translateX(70px);
-  }
-
-  .mercury {
-    transform: translate(-50%, -50%) translateX(55px);
-  }
+@media(max-width:600px){
+  .title{letter-spacing:1px}
+  .subtitle{font-size:10px}
+  .sun{width:75px;height:75px}
+  .blackhole{width:70px;height:70px}
+  .status{display:none}
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>🌌 ULTIMATE UNIVERSE EXPLORER</h1>
-  <div class="subtitle">Explore the Solar System</div>
+<canvas id="stars"></canvas>
 
-  <div class="search">
-    <input id="searchBox" placeholder="Search a planet...">
-    <button onclick="searchPlanet()">SEARCH</button>
+<div id="space">
+
+  <div class="header">
+    <div class="title">🌌 UNIVERSE EXPLORER</div>
+    <div class="subtitle">DISCOVER • EXPLORE • LEARN</div>
+
+    <div class="search">
+      <input id="search" placeholder="Search Sun, Earth, Mars, Black Hole...">
+      <button onclick="searchObject()">SEARCH</button>
+    </div>
   </div>
-</header>
 
-<div class="space">
+  <div id="sun" class="object sun"
+       style="left:50%;top:52%"
+       onclick="showObject('Sun')"></div>
 
-  <div class="orbit o1"></div>
-  <div class="orbit o2"></div>
-  <div class="orbit o3"></div>
-  <div class="orbit o4"></div>
-  <div class="orbit o5"></div>
-  <div class="orbit o6"></div>
-  <div class="orbit o7"></div>
-  <div class="orbit o8"></div>
+  <div id="mercury" class="object planet mercury"
+       style="left:57%;top:52%"
+       onclick="showObject('Mercury')"></div>
 
-  <div class="sun" onclick="showInfo('Sun')"></div>
+  <div id="venus" class="object planet venus"
+       style="left:64%;top:52%"
+       onclick="showObject('Venus')"></div>
 
-  <div class="planet mercury" onclick="showInfo('Mercury')"></div>
-  <div class="planet venus" onclick="showInfo('Venus')"></div>
-  <div class="planet earth" onclick="showInfo('Earth')"></div>
-  <div class="planet mars" onclick="showInfo('Mars')"></div>
-  <div class="planet jupiter" onclick="showInfo('Jupiter')"></div>
-  <div class="planet saturn" onclick="showInfo('Saturn')"></div>
-  <div class="planet uranus" onclick="showInfo('Uranus')"></div>
-  <div class="planet neptune" onclick="showInfo('Neptune')"></div>
+  <div id="earth" class="object planet earth"
+       style="left:72%;top:52%"
+       onclick="showObject('Earth')"></div>
+
+  <div id="mars" class="object planet mars"
+       style="left:80%;top:52%"
+       onclick="showObject('Mars')"></div>
+
+  <div id="jupiter" class="object planet jupiter"
+       style="left:89%;top:52%"
+       onclick="showObject('Jupiter')"></div>
+
+  <div id="saturn" class="object planet saturn"
+       style="left:25%;top:72%"
+       onclick="showObject('Saturn')"></div>
+
+  <div id="uranus" class="object planet uranus"
+       style="left:35%;top:78%"
+       onclick="showObject('Uranus')"></div>
+
+  <div id="neptune" class="object planet neptune"
+       style="left:47%;top:82%"
+       onclick="showObject('Neptune')"></div>
+
+  <div id="blackhole" class="object blackhole"
+       style="left:15%;top:35%"
+       onclick="showObject('Black Hole')"></div>
+
+  <div id="comet" class="object comet"
+       style="left:82%;top:25%"
+       onclick="showObject('Comet')"></div>
 
 </div>
 
-<div class="buttons">
-  <button onclick="randomPlanet()">🎲 RANDOM PLANET</button>
-  <button onclick="showInfo('Black Hole')">🕳️ BLACK HOLE</button>
-  <button onclick="showInfo('Asteroid')">☄️ ASTEROID</button>
-  <button onclick="showInfo('Galaxy')">🌌 GALAXY</button>
+<div class="status">DRAG TO EXPLORE • TAP OBJECTS</div>
+
+<div class="controls">
+  <button class="btn" onclick="randomDiscovery()">🎲 RANDOM</button>
+  <button class="btn" onclick="toggleOrbit()">🪐 ORBIT</button>
+  <button class="btn" onclick="zoomIn()">＋ ZOOM</button>
+  <button class="btn" onclick="zoomOut()">－ ZOOM</button>
+  <button class="btn" onclick="showObject('Asteroid')">☄️ ASTEROID</button>
+  <button class="btn" onclick="showObject('Galaxy')">🌌 GALAXY</button>
+  <button class="btn" onclick="showObject('Nebula')">✨ NEBULA</button>
 </div>
 
-<div class="info" id="infoBox">
-  <h2>🚀 Welcome, Explorer!</h2>
-  <p>Tap the Sun or any planet to discover more.</p>
+<div id="panel" class="panel">
+  <button class="close" onclick="closePanel()">×</button>
+  <h2 id="panelTitle"></h2>
+  <p id="panelText"></p>
+  <button class="btn" onclick="closePanel()">CONTINUE EXPLORING</button>
 </div>
 
 <script>
-const data = {
-  Sun: "The Sun is the star at the center of our Solar System. It provides the light and energy that make life on Earth possible.",
-  Mercury: "Mercury is the smallest planet and the closest planet to the Sun.",
-  Venus: "Venus is the hottest planet in our Solar System and has a very thick atmosphere.",
-  Earth: "Earth is our home planet and the only world currently known to support life.",
-  Mars: "Mars is a cold, rocky world often called the Red Planet.",
-  Jupiter: "Jupiter is the largest planet in our Solar System and is a gas giant.",
-  Saturn: "Saturn is famous for its spectacular system of rings.",
-  Uranus: "Uranus is an ice giant that rotates on its side.",
-  Neptune: "Neptune is a distant ice giant known for extremely strong winds.",
-  "Black Hole": "A black hole is a region of space where gravity is so strong that light cannot escape.",
-  Asteroid: "Asteroids are rocky objects that orbit the Sun. Most are found in the asteroid belt between Mars and Jupiter.",
-  Galaxy: "A galaxy is a huge collection of stars, gas, dust and other cosmic objects held together by gravity."
-};
 
-function showInfo(name) {
-  document.getElementById("infoBox").innerHTML = `
-    <h2>🌌 ${name}</h2>
-    <p>${data[name]}</p>
-  `;
-}
+/* =========================
+   STAR FIELD
+========================= */
 
-function randomPlanet() {
-  const planets = [
-    "Mercury","Venus","Earth","Mars",
-    "Jupiter","Saturn","Uranus","Neptune"
-  ];
+const canvas=document.getElementById("stars");
+const ctx=canvas.getContext("2d");
 
-  const random = planets[Math.floor(Math.random() * planets.length)];
-  showInfo(random);
-}
+let stars=[];
+let W,H;
 
-function searchPlanet() {
-  const input = document.getElementById("searchBox").value.trim().toLowerCase();
+function resize(){
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
 
-  const names = Object.keys(data);
-  const found = names.find(name => name.toLowerCase() === input);
+  stars=[];
 
-  if (found) {
-    showInfo(found);
-  } else {
-    document.getElementById("infoBox").innerHTML = `
-      <h2>🔎 Not Found</h2>
-      <p>Try searching for Sun, Earth, Mars, Jupiter, Saturn or another available object.</p>
-    `;
+  for(let i=0;i<220;i++){
+    stars.push({
+      x:Math.random()*W,
+      y:Math.random()*H,
+      r:Math.random()*1.7+.2,
+      speed:Math.random()*.5+.1,
+      alpha:Math.random()
+    });
   }
 }
+
+resize();
+window.addEventListener("resize",resize);
+
+function drawStars(){
+
+  ctx.clearRect(0,0,W,H);
+
+  for(const s of stars){
+
+    s.y+=s.speed;
+
+    if(s.y>H){
+      s.y=0;
+      s.x=Math.random()*W;
+    }
+
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${s.alpha})`;
+    ctx.fill();
+  }
+
+  requestAnimationFrame(drawStars);
+}
+
+drawStars();
+
+
+/* =========================
+   OBJECT DATA
+========================= */
+
+const objects={
+
+Sun:{
+title:"☀️ THE SUN",
+text:"The Sun is the star at the center of our Solar System. It provides the energy and light that power Earth's climate and support life."
+},
+
+Mercury:{
+title:"☿ MERCURY",
+text:"Mercury is the smallest planet and the closest planet to the Sun. A year on Mercury lasts only 88 Earth days."
+},
+
+Venus:{
+title:"♀ VENUS",
+text:"Venus has a thick atmosphere and is the hottest planet in our Solar System. Its surface is hidden beneath dense clouds."
+},
+
+Earth:{
+title:"🌍 EARTH",
+text:"Earth is our home planet. It has liquid water on its surface and is currently the only world known to support life."
+},
+
+Mars:{
+title:"🔴 MARS",
+text:"Mars is a cold rocky planet famous for its reddish appearance. Scientists study it as a major destination for future exploration."
+},
+
+Jupiter:{
+title:"♃ JUPITER",
+text:"Jupiter is the largest planet in our Solar System. It is a gas giant with powerful storms and many moons."
+},
+
+Saturn:{
+title:"♄ SATURN",
+text:"Saturn is a gas giant famous for its spectacular ring system. Its rings are made mostly of ice and rocky particles."
+},
+
+Uranus:{
+title:"♅ URANUS",
+text:"Uranus is an ice giant with a blue-green appearance. Its unusual rotation makes it appear to spin on its side."
+},
+
+Neptune:{
+title:"♆ NEPTUNE",
+text:"Neptune is a distant ice giant. It has some of the fastest winds known in the Solar System."
+},
+
+"Black Hole":{
+title:"🕳️ BLACK HOLE",
+text:"A black hole is a region of spacetime with extremely strong gravity. Once something passes the event horizon, it cannot escape."
+},
+
+Asteroid:{
+title:"☄️ ASTEROID BELT",
+text:"Asteroids are rocky objects that orbit the Sun. Many Solar System asteroids are found in the region between Mars and Jupiter."
+},
+
+Comet:{
+title:"☄️ COMET",
+text:"Comets are icy objects that can develop glowing comas and tails when they travel close enough to the Sun."
+},
+
+Galaxy:{
+title:"🌌 GALAXY",
+text:"A galaxy is a huge gravitationally bound system containing stars, gas, dust and other cosmic objects."
+},
+
+Nebula:{
+title:"✨ NEBULA",
+text:"A nebula is a giant cloud of gas and dust in space. Some nebulae are regions where new stars are forming."
+}
+
+};
+
+
+/* =========================
+   INFORMATION PANEL
+========================= */
+
+function showObject(name){
+
+  document.getElementById("panelTitle").textContent=objects[name].title;
+
+  document.getElementById("panelText").textContent=objects[name].text;
+
+  document.getElementById("panel").classList.add("show");
+}
+
+function closePanel(){
+  document.getElementById("panel").classList.remove("show");
+}
+
+
+/* =========================
+   RANDOM DISCOVERY
+========================= */
+
+function randomDiscovery(){
+
+  const list=Object.keys(objects);
+
+  const choice=list[Math.floor(Math.random()*list.length)];
+
+  showObject(choice);
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+function searchObject(){
+
+  const value=document
+    .getElementById("search")
+    .value
+    .trim()
+    .toLowerCase();
+
+  const found=Object.keys(objects).find(
+    x=>x.toLowerCase()===value
+  );
+
+  if(found){
+    showObject(found);
+  }else{
+
+    document.getElementById("panelTitle").textContent="🔎 OBJECT NOT FOUND";
+
+    document.getElementById("panelText").textContent=
+      "Try: Sun, Earth, Mars, Jupiter, Saturn, Black Hole, Asteroid, Comet, Galaxy or Nebula.";
+
+    document.getElementById("panel").classList.add("show");
+  }
+}
+
+
+/* =========================
+   ORBIT MODE
+========================= */
+
+let orbitOn=false;
+let orbitAngle=0;
+let orbitTimer=null;
+
+function toggleOrbit(){
+
+  orbitOn=!orbitOn;
+
+  if(orbitOn){
+
+    orbitTimer=setInterval(()=>{
+
+      orbitAngle+=.02;
+
+      const ids=[
+        "mercury",
+        "venus",
+        "earth",
+        "mars",
+        "jupiter"
+      ];
+
+      const radii=[7,14,21,28,36];
+
+      ids.forEach((id,i)=>{
+
+        const el=document.getElementById(id);
+
+        const x=50+Math.cos(
+          orbitAngle*(1+i*.12)
+        )*radii[i];
+
+        const y=52+Math.sin(
+          orbitAngle*(1+i*.12)
+        )*radii[i]*.55;
+
+        el.style.left=x+"%";
+        el.style.top=y+"%";
+      });
+
+    },30);
+
+  }else{
+
+    clearInterval(orbitTimer);
+  }
+}
+
+
+/* =========================
+   ZOOM
+========================= */
+
+let zoom=1;
+
+function zoomIn(){
+
+  zoom=Math.min(zoom+.15,2);
+
+  document.getElementById("space").style.transform=
+    `scale(${zoom})`;
+}
+
+function zoomOut(){
+
+  zoom=Math.max(zoom-.15,.7);
+
+  document.getElementById("space").style.transform=
+    `scale(${zoom})`;
+}
+
+
+/* =========================
+   DRAG EXPLORATION
+========================= */
+
+let dragging=false;
+let startX=0;
+let startY=0;
+let moveX=0;
+let moveY=0;
+
+const space=document.getElementById("space");
+
+space.addEventListener("pointerdown",e=>{
+
+  dragging=true;
+
+  startX=e.clientX-moveX;
+  startY=e.clientY-moveY;
+
+});
+
+space.addEventListener("pointermove",e=>{
+
+  if(!dragging)return;
+
+  moveX=e.clientX-startX;
+  moveY=e.clientY-startY;
+
+  space.style.transform=
+    `translate(${moveX}px,${moveY}px) scale(${zoom})`;
+});
+
+space.addEventListener("pointerup",()=>{
+  dragging=false;
+});
+
+space.addEventListener("pointercancel",()=>{
+  dragging=false;
+});
+
 </script>
 
 </body>
-</html>
+  </html>
